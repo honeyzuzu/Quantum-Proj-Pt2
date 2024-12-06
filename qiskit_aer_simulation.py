@@ -4,6 +4,7 @@ import qiskit as qs
 import qiskit_aer as aer
 import qiskit_ibm_runtime as ibm
 import matplotlib.pyplot as plt
+import DataClass as dc
 
 from scipy.optimize import minimize
 from qiskit.circuit.library import TwoLocal, EfficientSU2
@@ -29,3 +30,19 @@ if use_simulator:
 
 else:
     backend = hardware
+
+#Setting up the data
+start = dt.datetime(2016, 1, 1)
+end = dt.datetime(2021, 1, 1)
+file_path = "historic_data.xlsx"
+
+data = dc.DataClass(start, end, file_path)
+data.load_data()
+data.run()
+
+#Setting up the quantum algorithm
+initial_state = HartreeFock(num_spin_orbitals=data.num_spin_orbitals, num_particles=data.num_particles, qubit_mapping='parity')
+ansatz = UCCSD(num_spin_orbitals=data.num_spin_orbitals, num_particles=data.num_particles, initial_state=initial_state, qubit_mapping='parity')
+backend = aer.AerSimulator()
+optimizer = COBYLA(maxiter=1000)
+qalgo = VQE(ansatz, optimizer, quantum_instance=backend)
