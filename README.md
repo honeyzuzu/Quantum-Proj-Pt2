@@ -30,3 +30,29 @@ We calculate key risk measures, including:
 
 These metrics are derived from the logarithmic returns of the asset classes.
 
+---
+
+### 4. Performance Simulations
+For the simulations, we:
+- Use expected returns for the three asset classes rather than historical returns.
+- Retain the historical covariance matrix, as it is more stable over time.
+
+The simulation assumes that logarithmic returns follow a normal distribution. Over 10,000 iterations, we simulate 10 years of portfolio performance, obtaining the distribution of annual returns and volatilities.
+
+<span style="color:red;">Using quantum computing could significantly accelerate simulations, especially for portfolios with more than three asset classes.</span>
+
+---
+
+### 5. Rebalancing Rules
+We explore various rebalancing strategies:
+- **Fixed Frequency Rebalancing**: Quarterly, annually, or other predefined intervals.
+- **Dynamic Rebalancing**: Based on specific rules or conditions.
+
+---
+
+### 6. Statistical Metrics
+We evaluate the portfolio using the following metrics:
+- **Sharpe Ratio**: The ratio of annualized return to annualized volatility. (For simplicity, we assume a risk-free rate of zero.)
+- **Maximum Drawdown**: The largest peak-to-trough decline in portfolio value.
+- **Calmar Ratio**: The ratio of annualized return to maximum drawdown.
+
