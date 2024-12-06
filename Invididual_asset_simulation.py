@@ -1,3 +1,20 @@
+import pandas as pd
+import numpy as np
+import datetime
+import matplotlib.pyplot as plt
+import seaborn as sns
+from qiskit_finance.circuit.library.probability_distributions import NormalDistribution
+from qiskit import QuantumCircuit
+from qiskit_ibm_runtime import QiskitRuntimeService, Session, SamplerV2
+from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from qiskit_finance.circuit.library.probability_distributions import NormalDistribution
+from qiskit import QuantumCircuit
+import util
+from StockDataProcessor import StockDataProcessor
+from qiskit.circuit.library import Initialize, Isometry
+from scipy.stats import multivariate_normal
+
+
 def generate_quantum_normal_distribution_all_assets(expected_log_returns, variances, num_qubits, stddevs):
     # Create a list to hold the quantum circuits for each asset
     quantum_circuits = []
@@ -111,3 +128,52 @@ def split_dict_into_three(original_dict):
     #subdict2 = dict(sorted(subdict2.items(), key=lambda item: item[1]))
     #subdict3 = dict(sorted(subdict3.items(), key=lambda item: item[1]))
     return subdict1, subdict2, subdict3
+
+
+all_asset_samples = []
+i = 0
+for qc in qc_array:
+    isa_circuit = pm.run(qc)
+    isa_circuit.depth()
+
+    sampler = SamplerV2(backend=backend)
+    job = sampler.run([isa_circuit], shots=2000)
+    print(job.job_id())
+    counts = job.result()[0].data.meas.get_counts()
+    print(counts)
+    print(len(counts))
+
+    total_counts = sum(counts.values())
+    quasi_probabilities = {key: value / total_counts for key, value in counts.items()}
+    print(quasi_probabilities)
+    nearest_pd = nearest_probability_distribution(quasi_probabilities)
+    print(nearest_pd)
+
+    binary_samples = [k for k, v in nearest_pd.items() for _ in range(int(v * 2000))]
+    asset_samples = np.array([util.binary_to_asset_values_qc(sample, 3, [monthly_expected_log_returns[i]], data._cov_matrix) for sample in binary_samples])
+    all_asset_samples.append(asset_samples)
+    i += 1
+
+all_asset_samples = np.array(all_asset_samples)
+util.create_new_xlsx_monthly_dates(all_asset_samples,filename="../data/output_qc.xlsx")
+
+for i, asset_samples in enumerate(all_asset_samples):
+    # Reshape or flatten the asset samples as needed
+    flattened_samples = asset_samples.reshape(-1)  # Adjust this based on the actual shape you need
+    plt.figure()
+    sns.histplot(flattened_samples, bins=16, kde=False, color='blue')
+    plt.xlabel(f'Asset {i+1} Returns')
+    plt.ylabel('Frequency')
+    plt.title(f'Asset {i+1} Returns Distribution')
+    plt.savefig(f"../graphs/asset_{i+1}_returns_distribution.png")
+    plt.close()
+
+
+#creating data object for the generated data
+generated_Data = DataClass( 
+    start=datetime.datetime(2024, 4, 30),
+    end=datetime.datetime(2044, 11, 30),
+    file_path="../data/output_qc.xlsx")
+generated_Data.run()
+print("[GENERATED DATA STATS]")
+generated_Data.print_stats()    
