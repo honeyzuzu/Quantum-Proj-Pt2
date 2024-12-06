@@ -39,7 +39,7 @@ def generate_quantum_normal_distribution_all_assets(expected_log_returns, varian
     
     return quantum_circuits
 
-data = StockDataProcessor(
+data = DataClass(
     start=datetime.datetime(2004, 4, 30),
     end=datetime.datetime(2024, 3, 31),
     file_path="../data/historic_data.xlsx"
@@ -110,3 +110,4 @@ def split_dict_into_three(original_dict):
     #subdict1 = dict(sorted(subdict1.items(), key=lambda item: item[1]))
     #subdict2 = dict(sorted(subdict2.items(), key=lambda item: item[1]))
     #subdict3 = dict(sorted(subdict3.items(), key=lambda item: item[1]))
+    return subdict1, subdict2, subdict3
