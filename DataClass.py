@@ -22,6 +22,15 @@ class DataClass(BaseDataProvider):
         self._start = pd.to_datetime(start)
         self._end = pd.to_datetime(end)
         self._tickers = []
+        self._data = pd.DataFrame()
+        self._mean_vector = np.array([])
+        self._cov_matrix = np.array([])
+        self._stddev = np.array([])
+        self._correlation = np.array([])
+        self._volatility = np.array([])
+        self._sharpe_ratio = np.array([])
+        self._data = data
+        
 
 
         if self._data.empty and self._file_path is None:
@@ -64,3 +73,27 @@ class DataClass(BaseDataProvider):
     def get_mean_vector(self) -> np.ndarray:
         self._mean_vector = self._data.mean().values
         return self._mean_vector
+    
+    def get_covariance_matrix(self) -> np.ndarray:
+        self._cov_matrix = self._data.cov().values
+        return self._cov_matrix
+    
+    def get_stddev(self) -> np.ndarray: 
+        self._stddev = np.sqrt(np.diagonal(self._cov_matrix))
+        return self._stddev
+    
+    def get_correlation(self) -> np.ndarray:    
+        self._correlation = self._data.corr().values
+        return self._correlation
+    
+    def get_volatility(self) -> np.ndarray:
+        self._volatility = self._stddev * np.sqrt(252)
+        return self._volatility
+    
+    def get_sharpe_ratio(self) -> np.ndarray:
+        self._sharpe_ratio = (self._mean_vector / self._volatility)
+        return self._sharpe_ratio
+    
+    def get_data(self) -> pd.DataFrame:
+        return self._data
+    
