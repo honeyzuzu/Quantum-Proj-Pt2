@@ -46,3 +46,11 @@ ansatz = UCCSD(num_spin_orbitals=data.num_spin_orbitals, num_particles=data.num_
 backend = aer.AerSimulator()
 optimizer = COBYLA(maxiter=1000)
 qalgo = VQE(ansatz, optimizer, quantum_instance=backend)
+
+#Running the quantum algorithm
+result = qalgo.compute_minimum_eigenvalue(data.qubit_op)
+print(result)
+
+#Plotting the results
+plt.plot(result.history['optimal_value'])
+
