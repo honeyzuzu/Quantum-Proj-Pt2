@@ -67,12 +67,6 @@ plot_data(data._data['^GSPC'], 'S&P 500 (^GSPC) Prices')
 plot_data(data._data['^ACWX'], 'ACWI Ex-US (^ACWX) Prices')
 plot_data(data._data['^GLAB.L'], 'GlaxoSmithKline (^GLAB.L) Prices')
 
-def split_dict_into_three(original_dict):
-    new_dict = {}
-    for key, value in original_dict.items():
-        new_dict[key] = value
-    return new_dict
-
 def split_convert_dict(original_dict):
     new_dict = {}
     for key, value in original_dict.items():
@@ -93,3 +87,9 @@ def nearest_probability_distribution(quasi_probabilities):
         new_probabilities[key] = sum([value for k, value in quasi_probabilities.items() if key[0] == k[0]])
     
     return new_probabilities
+
+def split_dict_into_three(original_dict):
+    new_dict = {}
+    for key, value in original_dict.items():
+        new_dict[key] = value
+    return new_dict

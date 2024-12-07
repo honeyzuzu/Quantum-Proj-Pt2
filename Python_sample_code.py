@@ -105,3 +105,17 @@ annual_portfolio_return = (1 + monthly_returns["portfolio"]).prod() ** (
 ) - 1
 annual_portfolio_volatility = np.std(monthly_returns["portfolio"]) * np.sqrt(12)
 sharpe_ratio = (annual_portfolio_return - risk_free_rate) / annual_portfolio_vol
+
+
+# Plot the data
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))
+plt.plot(quarterly_returns["portfolio"], label="Portfolio Performance")
+plt.title("Portfolio Performance")
+plt.xlabel("Quarter")
+plt.ylabel("Portfolio Value")
+plt.legend()
+plt.grid()
+plt.show()
+
