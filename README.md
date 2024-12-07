@@ -20,8 +20,6 @@ We assume a portfolio with the following initial allocation:
 - **30% in international equities**  
 - **40% in global fixed income**
 
-Starting from April 2004, the portfolio is rebalanced monthly.
-
 ---
 
 ### 3. Historical Risk Measures
@@ -41,8 +39,6 @@ For the simulations, we:
 
 The simulation assumes that logarithmic returns follow a normal distribution. Over 10,000 iterations, we simulate 10 years of portfolio performance, obtaining the distribution of annual returns and volatilities.
 
-<span style="color:red;">Using quantum computing could significantly accelerate simulations, especially for portfolios with more than three asset classes.</span>
-
 ---
 
 ### 6. Statistical Metrics
@@ -50,4 +46,5 @@ We evaluate the portfolio using the following metrics:
 - **Sharpe Ratio**: The ratio of annualized return to annualized volatility. (For simplicity, we assume a risk-free rate of zero.)
 - **Maximum Drawdown**: The largest peak-to-trough decline in portfolio value.
 - **Calmar Ratio**: The ratio of annualized return to maximum drawdown.
+
 

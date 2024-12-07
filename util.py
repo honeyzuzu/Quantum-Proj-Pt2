@@ -111,3 +111,33 @@ def gen_data_timeseries(n, mu, sigma, seed=42):
 def gen_binary_data(n, mu, sigma, seed=42)
     data = gen_data(n, mu, sigma, seed)
     return np.array([np.array([1 if x > 0 else 0 for x in row]) for row in data])
+
+
+def map_to_qubits(hamiltonian):
+    # Create a SparsePauliOp using the Jordan-Wigner transform 
+    mapper = JordanWignerMapper()
+    mapped_hamiltonian = mapper.map(hamiltonian)
+
+    return mapped_hamiltonian, mapper
+
+def create_ansatze(mapped_hamiltonian, mapper):
+
+    num_spatial_orbitals = 2
+    num_particles = (1, 1)
+    
+    uccsd_ansatz = UCCSD(num_spatial_orbitals,
+                         num_particles,
+                         mapper,
+                         initial_state=HartreeFock(
+                             num_spatial_orbitals,
+                             num_particles,
+                             mapper,),)
+
+    twolocal_ansatz = TwoLocal(mapped_hamiltonian.num_qubits,        
+                           rotation_blocks=["rx", "ry"],
+                           entanglement_blocks=["cz"],
+                           entanglement="linear",
+                           reps=2,
+                           initial_state=None,)
+
+    return uccsd_ansatz, twolocal_ansatz
