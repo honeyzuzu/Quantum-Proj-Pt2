@@ -141,3 +141,96 @@ def create_ansatze(mapped_hamiltonian, mapper):
                            initial_state=None,)
 
     return uccsd_ansatz, twolocal_ansatz
+
+def run_vqe_twolocal(backend, isa_twolocal, isa_hamiltonian_twolocal):
+
+    num_params_twolocal = isa_twolocal.num_parameters
+    x0_twolocal = np.zeros(num_params_twolocal)
+    
+    twolocal_dict = {
+        'session_id': None,
+        'iters': 0,
+        'backend': backend.name,
+        'maxiter': 200,
+        'params': [],
+        'energy': [],
+        'job_ids': [],
+        'job_info':[],
+        'start_time': None,
+        'end_time': None,
+        'completed': False
+    }
+    
+    with ibm.Session(backend=backend, max_time=3600) as session:
+    
+        # Create the estimator and assign the shot value
+        estimator = ibm.EstimatorV2(mode=session)
+        estimator.options.default_precision = 1e-1
+        estimator.options.resilience_level = 1
+        estimator.options.default_shots = 8192
+    
+        try:
+            # Execute the minimization
+            res = minimize(
+                energy_function,
+                x0_twolocal,
+                args=(isa_twolocal, 
+                      isa_hamiltonian_twolocal, 
+                      estimator, 
+                      session, 
+                      twolocal_dict),
+                method='COBYLA',
+                tol=1e-1,
+            )
+    
+        except ibm.IBMRuntimeError:
+            print("Session closed after exceeding time limit. Stopping iteration.")
+    
+    return twolocal_dict
+
+
+def run_vqe_uccsd(backend, isa_uccsd, isa_hamiltonian_uccsd):
+
+    num_params_uccsd = isa_uccsd.num_parameters
+    x0_uccsd = np.zeros(num_params_uccsd)
+    
+    uccsd_dict = {
+        'session_id': None,
+        'iters': 0,
+        'backend': backend.name,
+        'maxiter': 200,
+        'params': [],
+        'energy': [],
+        'job_ids': [],
+        'job_info':[],
+        'start_time': None,
+        'end_time': None,
+        'completed': False
+    }
+    
+    with ibm.Session(backend=backend, max_time=3600) as session:
+    
+        # Create the estimator and assign the shot value
+        estimator = ibm.EstimatorV2(mode=session)
+        estimator.options.default_precision = 1e-1
+        estimator.options.resilience_level = 1
+        estimator.options.default_shots = 8192
+    
+        try:
+            # Execute the minimization
+            res = minimize(
+                energy_function,
+                x0_uccsd,
+                args=(isa_uccsd, 
+                      isa_hamiltonian_uccsd, 
+                      estimator, 
+                      session, 
+                      uccsd_dict),
+                method='COBYLA',
+                tol=1e-1,
+            )
+    
+        except ibm.IBMRuntimeError:
+            print("Session closed after exceeding time limit. Stopping iteration.")
+    
+    return uccsd_dict

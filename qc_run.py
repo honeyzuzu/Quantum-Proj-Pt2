@@ -149,3 +149,35 @@ def run():
     result = job.result()
     
     return result
+
+
+# Create the molecular model and Hamiltonian
+mapped_hamiltonian, mapper = map_to_qubits(hamiltonian)
+
+# Create the ansatze
+uccsd_ansatz, twolocal_ansatz = create_ansatze(mapped_hamiltonian, mapper)
+
+# Create the quantum circuits for each ansatz combination
+isa_uccsd, isa_hamiltonian_uccsd = transpile_and_apply(uccsd_ansatz,
+                                                       mapped_hamiltonian,
+                                                       backend=backend,
+                                                       optimization_level=3,
+                                                       passmanager=pm)
+
+isa_twolocal, isa_hamiltonian_twolocal = transpile_and_apply(twolocal_ansatz,
+                                                             mapped_hamiltonian,
+                                                             backend=backend,
+                                                             optimization_level=3,
+                                                             passmanager=pm)
+
+twolocal_results = run_vqe_twolocal(backend, isa_twolocal, isa_hamiltonian_twolocal)
+
+ham = mapped_hamiltonian.to_matrix()
+reference_energy = np.linalg.eigh(ham)[0][0]
+
+uccsd_energy, uccsd_err = uccsd_results['energy'][-1]
+twolocal_energy, twolocal_err = twolocal_results['energy'][-1]
+
+print(f'Reference Energy: {reference_energy} eV')
+print(f'UCCSD Energy: {uccsd_energy} eV')
+print(f'TwoLocal Energy: {twolocal_energy} eV')
