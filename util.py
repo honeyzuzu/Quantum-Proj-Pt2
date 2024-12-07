@@ -85,3 +85,17 @@ def binary_to_asset_values_timeseries(time_series, mu, sigma):
 
     return time_series
 
+def binary_to_asset_values_test(binary, num_assets, expected_returns, cov_matrix):
+    # Convert the binary string to a list of integers
+    binary_list = [int(bit) for bit in binary]
+    
+    # Calculate the asset values
+    asset_values = []
+    for i in range(num_assets):
+        asset_value = expected_returns[i]
+        for j in range(num_assets):
+            asset_value += binary_list[j] * cov_matrix[i, j]
+        asset_values.append(asset_value)
+    
+    return asset_values
+

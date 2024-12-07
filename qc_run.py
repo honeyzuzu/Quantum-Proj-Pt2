@@ -36,3 +36,22 @@ data = DataClass(
 )
 data.load_data()
 data.run()
+
+monthly_expected_log_returns = data._mean_vector
+cov_matrix = data._cov_matrix
+num_qubits = [3,3,3]
+stddev = data._stddev
+
+qc = generate_quantum_normal_distribution(cov_matrix, monthly_expected_log_returns, num_qubits, stddev)
+qc.draw(output="mpl")
+num_shots = 120
+sampler = SamplerV2()
+job = sampler.run([qc], shots=num_shots)
+result = job.result()
+
+counts = result.quasi_dists[0].nearest_probability_distribution().binary_probabilities()
+print(counts)
+print(len(counts))
+binary_samples = [k for k, v in counts.items() for _ in range(int(v * num_shots))]
+asset_values = util.binary_to_asset_values_qc(binary_samples[0], 3, monthly_expected_log_returns, cov_matrix)
+print(asset_values)
