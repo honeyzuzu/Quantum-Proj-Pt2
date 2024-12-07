@@ -41,11 +41,12 @@ data.load_data()
 data.run()
 
 #Setting up the quantum algorithm
-initial_state = HartreeFock(num_spin_orbitals=data.num_spin_orbitals, num_particles=data.num_particles, qubit_mapping='parity')
-ansatz = UCCSD(num_spin_orbitals=data.num_spin_orbitals, num_particles=data.num_particles, initial_state=initial_state, qubit_mapping='parity')
-backend = aer.AerSimulator()
-optimizer = COBYLA(maxiter=1000)
-qalgo = VQE(ansatz, optimizer, quantum_instance=backend)
+driver = PySCFDriver(atom="H .0 .0 .0; H .0 .0 0.735", unit=DistanceUnit.ANGSTROM, basis='sto3g')
+es_driver = ElectronicStructureDriver(driver)
+qubit_op = es_driver.run()
+
+qubit_op = FermionicOp(h1=qubit_op.one_body_integrals, h2=qubit_op.two_body_integrals).mapping(JordanWignerMapper())
+
 
 #Running the quantum algorithm
 result = qalgo.compute_minimum_eigenvalue(data.qubit_op)

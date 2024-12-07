@@ -6,12 +6,6 @@ from decimal import Decimal, getcontext
 
 #Class to handle the data that will be used in the quantum algorithm
 
-import pandas as pd
-import numpy as np
-from qiskit_finance.data_providers import BaseDataProvider
-from decimal import Decimal, getcontext
-
-
 class DataClass(BaseDataProvider):
     """
     DataClass is a child class of parent class BaseDataProvider from Qiskit Finance.

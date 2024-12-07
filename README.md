@@ -1,6 +1,6 @@
 # Quantum-Project (Quantum Multi Period Asset Allocation Problem)
 
-This project uses simulations to estimate the potential return and risk of a portfolio with a specified asset allocation over a 10-year horizon. The problem is divided into the following steps, with sample Python code
+This project uses simulations to estimate the potential return and risk of a portfolio with a specified asset allocation over a 10-years. The problem is divided into the following steps, with sample Python code
 
 ---
 
@@ -9,6 +9,8 @@ A typical investment portfolio consists of three main asset classes:
 - **US Equities**: Represented by the *S&P 500 Index*.
 - **International Equities**: Represented by the *MSCI ACWI ex US Index*.
 - **Global Fixed Income**: Represented by the *Bloomberg Global Aggregate Index*.
+
+We may use alternate investments in the future. 
 
 ---
 
@@ -40,13 +42,6 @@ For the simulations, we:
 The simulation assumes that logarithmic returns follow a normal distribution. Over 10,000 iterations, we simulate 10 years of portfolio performance, obtaining the distribution of annual returns and volatilities.
 
 <span style="color:red;">Using quantum computing could significantly accelerate simulations, especially for portfolios with more than three asset classes.</span>
-
----
-
-### 5. Rebalancing Rules
-We explore various rebalancing strategies:
-- **Fixed Frequency Rebalancing**: Quarterly, annually, or other predefined intervals.
-- **Dynamic Rebalancing**: Based on specific rules or conditions.
 
 ---
 

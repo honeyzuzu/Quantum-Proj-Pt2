@@ -36,3 +36,29 @@ def create_new_xlsx_monthly_dates(load_data, filename, secondTime = 0):
     for i, row in enumerate(load_data):
         ws.append([monthly_dates[i].strftime('%Y-%m-%d')] + row.tolist())
     wb.save(filename)
+
+def binary_to_asset_values_qc(binary, num_assets, expected_returns, cov_matrix):
+    # Convert the binary string to a list of integers
+    binary_list = [int(bit) for bit in binary]
+    
+    # Calculate the asset values
+    asset_values = []
+    for i in range(num_assets):
+        asset_value = expected_returns[i]
+        for j in range(num_assets):
+            asset_value += binary_list[j] * cov_matrix[i, j]
+        asset_values.append(asset_value)
+    
+    return asset_values
+
+def generate_quantum_normal_distribution_all_assets(expected_returns, cov_matrix, num_qubits, stddev):
+    # Calculate the number of assets
+    num_assets = len(expected_returns)
+    
+    # Initialize the quantum circuits
+    qc_array = []
+    for i in range(num_assets):
+        qc = generate_quantum_normal_distribution(expected_returns[i], cov_matrix[i, i], num_qubits[i], stddev[i])
+        qc_array.append(qc)
+    
+    return qc_array
