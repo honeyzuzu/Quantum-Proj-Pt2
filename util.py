@@ -62,3 +62,26 @@ def generate_quantum_normal_distribution_all_assets(expected_returns, cov_matrix
         qc_array.append(qc)
     
     return qc_array
+
+def binary_to_asset_values_timeseries(time_series, mu, sigma):
+    # Calculate the number of assets
+    elements1 = [sublist[0] for sublist in time_series]
+    elements2 = [sublist[1] for sublist in time_series]
+    elements3 = [sublist[2] for sublist in time_series]
+
+    # Calculate the average and standard deviation of the elements
+    average1 = np.mean(elements1)
+    average2 = np.mean(elements2)
+    average3 = np.mean(elements3)
+    stddev1 = np.std(elements1)
+    stddev2 = np.std(elements2)
+    stddev3 = np.std(elements3)
+
+    # Normalize the elements
+    for row in time_series:
+        row[0] = ((row[0]- average1) / stddev1 ) * np.sqrt(sigma[0][0]) + mu[0]
+        row[1] = ((row[1]- average2) / stddev2 ) * np.sqrt(sigma[1][1]) + mu[1]
+        row[2] = ((row[2]- average3) / stddev3 ) * np.sqrt(sigma[2][2]) + mu[2]
+
+    return time_series
+

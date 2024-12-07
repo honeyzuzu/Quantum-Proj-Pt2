@@ -47,6 +47,22 @@ qubit_op = es_driver.run()
 
 qubit_op = FermionicOp(h1=qubit_op.one_body_integrals, h2=qubit_op.two_body_integrals).mapping(JordanWignerMapper())
 
+qc = generate_quantum_normal_distribution(data._cov_matrix,monthly_expected_log_returns,num_qubits, data._stddev)
+qc.draw(output="mpl")
+num_shots = 120
+sampler = Sampler()
+job = sampler.run([qc], shots=num_shots)
+result = job.result()
+
+counts = result.quasi_dists[0].nearest_probability_distribution().binary_probabilities()
+print(counts)
+print(len(counts))
+binary_samples = [k for k, v in counts.items() for _ in range(int(v * num_shots))]
+print(binary_samples)
+print(len(binary_samples))
+asset_samples = np.array([util.binary_to_asset_values_test(sample, num_qubits, monthly_expected_log_returns, data._cov_matrix) for sample in binary_samples])
+util.create_new_xlsx_monthly_dates(asset_samples,filename="output.xlsx")
+
 
 #Running the quantum algorithm
 result = qalgo.compute_minimum_eigenvalue(data.qubit_op)
@@ -54,4 +70,34 @@ print(result)
 
 #Plotting the results
 plt.plot(result.history['optimal_value'])
+
+
+
+# Load the generated percent data
+generated_percent_data = dc(
+    start=dt.datetime(2024, 4, 30),
+    end=dt.datetime(2044, 11, 30),
+    file_path="../data/percentage_output.xlsx"
+)
+generated_percent_data.run_nonlog()
+
+portfolio_returns = generated_percent_data._data.dot(annual_expected_returns)
+
+annual_portfolio_return = (1 + portfolio_returns).prod() ** (12 / generated_Data._data.shape[0]) - 1
+annual_portfolio_volatility = np.std(portfolio_returns) * np.sqrt(12)
+risk_free_rate = 0.00
+sharpe_ratio = (annual_portfolio_return - risk_free_rate) / annual_portfolio_volatility
+# calculate the maximum drawdown
+cumulative_returns = (1 + portfolio_returns).cumprod()
+max_drawdown = np.min(
+    cumulative_returns / np.maximum.accumulate(cumulative_returns) - 1
+)
+# calculate the Calmar ratio
+calmar_ratio = annual_portfolio_return / max_drawdown
+
+print("annual_portfolio_return: ",annual_portfolio_return)
+print("annual_portfolio_volatility: ",annual_portfolio_volatility)
+print("sharpe_ratio: ",sharpe_ratio)
+print("max_drawdown: ", max_drawdown)
+print("calmar_ratio: ",calmar_ratio)
 
