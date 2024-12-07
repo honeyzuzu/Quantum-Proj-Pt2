@@ -10,7 +10,7 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_finance.circuit.library.probability_distributions import NormalDistribution
 from qiskit import QuantumCircuit
 import util
-from StockDataProcessor import StockDataProcessor
+from DataClass import DataClass
 from qiskit.circuit.library import Initialize, Isometry
 from scipy.stats import multivariate_normal
 
@@ -31,6 +31,7 @@ def generate_quantum_normal_distribution_all_assets(expected_log_returns, varian
         lower_bound = expected_log_return - 3 * stddev
         upper_bound = expected_log_return + 3 * stddev
         bounds = [(lower_bound, upper_bound)]
+        
         
         # Create the normal distribution circuit for the given parameters
         #mvnd = NormalDistribution(num_qubits=3, mu=[expected_log_return], sigma=[[variance]], bounds=bounds)
@@ -53,6 +54,7 @@ def generate_quantum_normal_distribution_all_assets(expected_log_returns, varian
         
         # Add the quantum circuit to the list
         quantum_circuits.append(qc)
+
     
     return quantum_circuits
 
@@ -75,60 +77,24 @@ backend = service.backend("ibm_rensselaer")
 pm = generate_preset_pass_manager(backend=backend,optimization_level=1) #transpilation readable for quantum computer
 
 def nearest_probability_distribution(quasi_probabilities):
-    """Takes a quasiprobability distribution and maps
-    it to the closest probability distribution as defined by
-    the L2-norm.
-    Returns:
-        ProbDistribution: Nearest probability distribution.
-        float: Euclidean (L2) distance of distributions.
-    Notes:
-        Method from Smolin et al., Phys. Rev. Lett. 108, 070502 (2012).
-    """
-    sorted_probs = dict(sorted(quasi_probabilities.items(), key=lambda item: item[1]))
-    num_elems = len(sorted_probs)
-    new_probs = {}
-    beta = 0
-    diff = 0
-    for key, val in sorted_probs.items():
-        temp = val + beta / num_elems
-        if temp < 0:
-            beta += val
-            num_elems -= 1
-            diff += val * val
-        else:
-            diff += (beta / num_elems) * (beta / num_elems)
-            new_probs[key] = sorted_probs[key] + beta / num_elems
-    return new_probs
+    # Split the quasi-probabilities into three groups
+    quasi_probabilities = split_dict_into_three(quasi_probabilities)
+    
+    # Initialize the new probabilities
+    new_probabilities = {key: 0 for key in quasi_probabilities.keys()}
+    
+    # Iterate over the new probabilities
+    for key in new_probabilities.keys():
+        # Calculate the new probability
+        new_probabilities[key] = sum([value for k, value in quasi_probabilities.items() if key[0] == k[0]])
+    
+    return new_probabilities
 
 def split_dict_into_three(original_dict):
-    # Calculate the number of items for each subdictionary
-    total_items = len(original_dict)
-    subdict_size = total_items // 3
-    
-    # Initialize subdictionaries
-    subdict1, subdict2, subdict3 = {}, {}, {}
-    
-    # Iterator for dictionary items
-    iterator = iter(original_dict.items())
-    
-    # Fill the first subdictionary
-    for _ in range(subdict_size):
-        key, value = next(iterator)
-        subdict1[key] = value
-    
-    # Fill the second subdictionary
-    for _ in range(subdict_size):
-        key, value = next(iterator)
-        subdict2[key] = value
-    
-    # Fill the third subdictionary with the remaining items
-    for key, value in iterator:
-        subdict3[key] = value
-    #subdict1 = dict(sorted(subdict1.items(), key=lambda item: item[1]))
-    #subdict2 = dict(sorted(subdict2.items(), key=lambda item: item[1]))
-    #subdict3 = dict(sorted(subdict3.items(), key=lambda item: item[1]))
-    return subdict1, subdict2, subdict3
-
+    new_dict = {}
+    for key, value in original_dict.items():
+        new_dict[key] = value
+    return new_dict
 
 all_asset_samples = []
 i = 0
@@ -140,14 +106,10 @@ for qc in qc_array:
     job = sampler.run([isa_circuit], shots=2000)
     print(job.job_id())
     counts = job.result()[0].data.meas.get_counts()
-    print(counts)
-    print(len(counts))
 
     total_counts = sum(counts.values())
     quasi_probabilities = {key: value / total_counts for key, value in counts.items()}
-    print(quasi_probabilities)
     nearest_pd = nearest_probability_distribution(quasi_probabilities)
-    print(nearest_pd)
 
     binary_samples = [k for k, v in nearest_pd.items() for _ in range(int(v * 2000))]
     asset_samples = np.array([util.binary_to_asset_values_qc(sample, 3, [monthly_expected_log_returns[i]], data._cov_matrix) for sample in binary_samples])
@@ -165,7 +127,7 @@ for i, asset_samples in enumerate(all_asset_samples):
     plt.xlabel(f'Asset {i+1} Returns')
     plt.ylabel('Frequency')
     plt.title(f'Asset {i+1} Returns Distribution')
-    plt.savefig(f"../graphs/asset_{i+1}_returns_distribution.png")
+    plt.savefig(f"asset_{i+1}_returns_dist.png")
     plt.close()
 
 
@@ -173,7 +135,7 @@ for i, asset_samples in enumerate(all_asset_samples):
 generated_Data = DataClass( 
     start=datetime.datetime(2024, 4, 30),
     end=datetime.datetime(2044, 11, 30),
-    file_path="../data/output_qc.xlsx")
+    file_path="output_generation_aer.xlsx")
 generated_Data.run()
-print("[GENERATED DATA STATS]")
+print("[DATA STATS]")
 generated_Data.print_stats()    

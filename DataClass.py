@@ -28,9 +28,8 @@ class DataClass(BaseDataProvider):
         self._stddev = np.array([])
         self._correlation = np.array([])
         self._volatility = np.array([])
-        self._sharpe_ratio = np.array([])
         self._data = data
-        
+
 
 
         if self._data.empty and self._file_path is None:
@@ -89,10 +88,6 @@ class DataClass(BaseDataProvider):
     def get_volatility(self) -> np.ndarray:
         self._volatility = self._stddev * np.sqrt(252)
         return self._volatility
-    
-    def get_sharpe_ratio(self) -> np.ndarray:
-        self._sharpe_ratio = (self._mean_vector / self._volatility)
-        return self._sharpe_ratio
     
     def get_data(self) -> pd.DataFrame:
         return self._data

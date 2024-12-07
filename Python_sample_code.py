@@ -52,13 +52,7 @@ cumulative_returns = (1 + simulated_returns["portfolio"]).cumprod()
 max_drawdown = np.min(
     cumulative_returns / np.maximum.accumulate(cumulative_returns) - 1
 )
-# calculate the Calmar ratio
-calmar_ratio = annual_portfolio_return / max_drawdown
 
-# Rebalance the portfolio quarterly based on the historical data
-# Similar approach can be used to calculate the portfolio performance for other rebalancing frequencies
-# such as monthly, semi-annually, and annually
-# The approach can also be used to calculate the portfolio performance for simulated data.
 quarterly_returns = historic_data.iloc[:, 1:4]
 quarterly_returns = (1 + quarterly_returns).cumprod()
 dates = historic_data["Date"]
@@ -66,6 +60,7 @@ months = pd.DatetimeIndex(dates).month
 quarter_ends = np.where(months % 3 == 0)[0]
 quarterly_returns = quarterly_returns.iloc[quarter_ends]
 quarterly_returns.loc[-1] = 1
+
 quarterly_returns = quarterly_returns.sort_index()
 quarterly_returns = quarterly_returns.pct_change()
 quarterly_returns = quarterly_returns.dropna()
@@ -79,13 +74,10 @@ annual_portfolio_return = (1 + quarterly_returns["portfolio"]).prod() ** (
 annual_portfolio_volatility = np.std(simulated_returns["portfolio"]) * np.sqrt(4)
 
 # Dynamic rebalancing based on the historical data
-
-import matplotlib.pyplot as plt
-
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-
+simulated_returns = pd.DataFrame(
+    np.random.multivariate_normal(monthly_expected_log_returns, cov_matrix, 120),
+    columns=["US Equities", "International Equities", "Global Fixed Income"],
+)
 simulated_returns = simulated_returns.head(120)  # Take only the first 120 months for a 10-year period
 
 # Ensure simulated_returns dataframe exists
@@ -102,14 +94,9 @@ monthly_returns = monthly_returns.pct_change().dropna().reset_index(drop=True)
 monthly_returns["portfolio"] = monthly_returns.dot(weights)
 cumulative_monthly_returns = (1 + monthly_returns["portfolio"]).cumprod()
 
-# Plotting the results over 10 years
-plt.figure(figsize=(10, 6))
-plt.plot(simulated_returns["Date"], cumulative_monthly_returns, label='Cumulative Portfolio Returns (Monthly Rebalancing)', color='blue')
-plt.title('Cumulative Portfolio Returns over 10 Years with Monthly Rebalancing')
-plt.xlabel('Time (Months)')
-plt.ylabel('Cumulative Returns')
-plt.legend()
-plt.grid(True)
-plt.savefig("cumulative_portfolio_returns_10_years.png")
-print("Portfolio performance saved as cumulative_portfolio_returns_10_years.png")
+# Calculate the maximum drawdown
+max_drawdown = np.min(
+    cumulative_monthly_returns / np.maximum.accumulate(cumulative_monthly_returns) - 1
+)
 
+# Calculate the Sharpe ratio
