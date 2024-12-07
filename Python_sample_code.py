@@ -100,3 +100,8 @@ max_drawdown = np.min(
 )
 
 # Calculate the Sharpe ratio
+annual_portfolio_return = (1 + monthly_returns["portfolio"]).prod() ** (
+    12 / monthly_returns.shape[0]
+) - 1
+annual_portfolio_volatility = np.std(monthly_returns["portfolio"]) * np.sqrt(12)
+sharpe_ratio = (annual_portfolio_return - risk_free_rate) / annual_portfolio_vol

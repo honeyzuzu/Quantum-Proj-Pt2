@@ -79,3 +79,17 @@ def split_convert_dict(original_dict):
         new_key = key.split()
         new_dict[new_key] = value
     return new_dict
+
+def nearest_probability_distribution(quasi_probabilities):
+    # Split the quasi-probabilities into three groups
+    quasi_probabilities = split_dict_into_three(quasi_probabilities)
+    
+    # Initialize the new probabilities
+    new_probabilities = {key: 0 for key in quasi_probabilities.keys()}
+    
+    # Iterate over the new probabilities
+    for key in new_probabilities.keys():
+        # Calculate the new probability
+        new_probabilities[key] = sum([value for k, value in quasi_probabilities.items() if key[0] == k[0]])
+    
+    return new_probabilities
