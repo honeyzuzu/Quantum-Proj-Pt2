@@ -93,3 +93,59 @@ def split_dict_into_three(original_dict):
     for key, value in original_dict.items():
         new_dict[key] = value
     return new_dict
+
+def get_timestamp():
+    """
+    Returns the current UTC timestamp in ISO-8601 format.
+
+    Returns
+    -------
+    str
+    """
+    return dt.datetime.now(dt.UTC).isoformat()
+
+
+def transpile_and_apply(ansatz, hamiltonian, backend, optimization_level=3, passmanager=None):
+    """
+    Transpile the ansatz circuit and apply the Hamiltonian observable to the backend layout.
+    """
+
+    if not passmanager:
+        passmanager = generate_preset_pass_manager(target=backend.target,
+                                                   optimization_level=optimization_level)
+    
+    isa_ansatz = passmanager.run(ansatz)
+    isa_hamiltonian = hamiltonian.apply_layout(isa_ansatz.layout)
+
+    return isa_ansatz, isa_hamiltonian
+
+def create(bond_length=0.735):
+    atom1 = f"H 0 0 {-bond_length/2}"
+    atom2 = f"H 0 0 {bond_length/2}"
+
+    atom = "; ".join([atom1, atom2])
+    
+    driver = PySCFDriver(
+        atom=atom,
+        basis="sto3g",
+        charge=0,
+        spin=0,
+        unit=DistanceUnit.ANGSTROM,
+    )
+    problem = driver.run()
+    hamiltonian = problem.hamiltonian.second_q_op()
+
+    return problem, hamiltonian
+
+def run():
+    # Create the problem and Hamiltonian
+    problem, hamiltonian = create()
+
+    # Transpile the ansatz and apply the Hamiltonian
+    isa_ansatz, isa_hamiltonian = transpile_and_apply(ansatz, hamiltonian, backend) 
+
+    # Run the simulation
+    job = backend.run([isa_ansatz, isa_hamiltonian], shots=shots)
+    result = job.result()
+    
+    return result
