@@ -99,3 +99,15 @@ def binary_to_asset_values_test(binary, num_assets, expected_returns, cov_matrix
     
     return asset_values
 
+
+def gen_data(n, mu, sigma, seed=42):
+    np.random.seed(seed)
+    return np.random.multivariate_normal(mu, sigma, n)
+
+def gen_data_timeseries(n, mu, sigma, seed=42):
+    np.random.seed(seed)
+    return np.random.multivariate_normal(mu, sigma, n)
+
+def gen_binary_data(n, mu, sigma, seed=42)
+    data = gen_data(n, mu, sigma, seed)
+    return np.array([np.array([1 if x > 0 else 0 for x in row]) for row in data])

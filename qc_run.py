@@ -55,3 +55,27 @@ print(len(counts))
 binary_samples = [k for k, v in counts.items() for _ in range(int(v * num_shots))]
 asset_values = util.binary_to_asset_values_qc(binary_samples[0], 3, monthly_expected_log_returns, cov_matrix)
 print(asset_values)
+
+def plot_data(data, title):
+    plt.figure(figsize=(10, 6))
+    plt.plot(data)
+    plt.title(title)
+    plt.grid()
+    plt.show()
+
+plot_data(data._data['^GSPC'], 'S&P 500 (^GSPC) Prices')
+plot_data(data._data['^ACWX'], 'ACWI Ex-US (^ACWX) Prices')
+plot_data(data._data['^GLAB.L'], 'GlaxoSmithKline (^GLAB.L) Prices')
+
+def split_dict_into_three(original_dict):
+    new_dict = {}
+    for key, value in original_dict.items():
+        new_dict[key] = value
+    return new_dict
+
+def split_convert_dict(original_dict):
+    new_dict = {}
+    for key, value in original_dict.items():
+        new_key = key.split()
+        new_dict[new_key] = value
+    return new_dict

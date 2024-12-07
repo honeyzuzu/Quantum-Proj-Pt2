@@ -42,8 +42,11 @@ data.run()
 
 #Setting up the quantum algorithm
 driver = PySCFDriver(atom="H .0 .0 .0; H .0 .0 0.735", unit=DistanceUnit.ANGSTROM, basis='sto3g')
+
 es_driver = ElectronicStructureDriver(driver)
+
 qubit_op = es_driver.run()
+
 
 qubit_op = FermionicOp(h1=qubit_op.one_body_integrals, h2=qubit_op.two_body_integrals).mapping(JordanWignerMapper())
 
@@ -54,9 +57,12 @@ sampler = Sampler()
 job = sampler.run([qc], shots=num_shots)
 result = job.result()
 
+
 counts = result.quasi_dists[0].nearest_probability_distribution().binary_probabilities()
 print(counts)
 print(len(counts))
+
+
 binary_samples = [k for k, v in counts.items() for _ in range(int(v * num_shots))]
 print(binary_samples)
 print(len(binary_samples))
@@ -68,11 +74,8 @@ util.create_new_xlsx_monthly_dates(asset_samples,filename="output.xlsx")
 result = qalgo.compute_minimum_eigenvalue(data.qubit_op)
 print(result)
 
-#Plotting the results
-plt.plot(result.history['optimal_value'])
 
-
-
+"""
 # Load the generated percent data
 generated_percent_data = dc(
     start=dt.datetime(2024, 4, 30),
@@ -100,4 +103,8 @@ print("annual_portfolio_volatility: ",annual_portfolio_volatility)
 print("sharpe_ratio: ",sharpe_ratio)
 print("max_drawdown: ", max_drawdown)
 print("calmar_ratio: ",calmar_ratio)
+
+"""
+
+
 

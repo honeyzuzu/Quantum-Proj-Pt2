@@ -23,9 +23,9 @@ class DataClass(BaseDataProvider):
         self._correlation = np.array([])
         self._volatility = np.array([])
         self._data = data
+        self._prices = np.array([])
 
-
-
+        # Check if either file_path or data is provided
         if self._data.empty and self._file_path is None:
             raise ValueError("Either file_path or data must be provided")
 
@@ -85,4 +85,9 @@ class DataClass(BaseDataProvider):
     
     def get_data(self) -> pd.DataFrame:
         return self._data
+    
+    def get_prices(self) -> pd.DataFrame:
+        return np.exp(self._data.cumsum())
+    
+
     
